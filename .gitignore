@@ -1,0 +1,56 @@
+# MATLAB specific files to ignore
+
+## Compiled and Executable Files
+# MEX files (Compiled C/C++ or Fortran code for speed)
+*.mex*
+# Standalone executables and associated files created by MATLAB Compiler
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+
+## MATLAB Generated Files
+# Data files saved during execution (unless explicitly tracked)
+*.mat
+# Figure files (unless explicitly tracking generated plots)
+*.fig
+# Simulation log files
+*.slx.r
+*.sfx
+*.log
+# Code coverage reports
+*.code_coverage
+
+## Simulink Generated Files
+# C code generation files
+/slprj/
+*.slx.bak
+
+## Preference, Layout, and Environment Files
+# User preferences, desktop layouts, and history
+desktop.ini
+history.m
+matlab.prf
+matlab.err
+matlab.log
+# Simulink preference files
+*.sltx
+# Temporary files created by the editor or other tools
+*~
+*.bak
+*.asv
+
+## Documentation and Reports
+# HTML reports, generated documentation, etc.
+/html/
+/doc/
+/report/
+
+## Operating System and Editor Files (General)
+.DS_Store
+Thumbs.db
+*.swp
+*.o
+*.out
+*.a
