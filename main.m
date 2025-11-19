@@ -1,7 +1,15 @@
+% Model parameters
+A = 1;
 % Initial condition
-h = 5;
-tau = [-h:0];
-x = @(t) (t < 0).*0 + (t == 0).*1;
+phi0 = 1;
+% Time
+t = 2;
+% Force as a function
+f = @(s) (s < 0).*0 + (s >= 0).*1;
+
+
+% Solution
+x = solution(A, phi0, f, t)
 
 
 
