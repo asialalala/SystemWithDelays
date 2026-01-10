@@ -11,16 +11,15 @@ function [numHandle, formulaSym] = getFormula(k)
     y_n = sym('y_n');
     syms f(n);
 
-    gamma =  getCoefficients(k);% Zbiór wspó³czynników metody
+    gamma =  getCoefficients(k); % Zbiór wspó³czynników metody
 
     % 2. Wyznaczenie symbolicznego wzoru
     sum = 0;
     for j = 0:k-1
-        sum = sum + gamma(j + 1) * delata(f, j, n);
+        sum = sum + gamma(j + 1) * backwardDifference(f, j, n);
     end
-    
-    formulaSym = simplify(expand(y_n + h*sum));
-    
+    formulaSym = simplify(y_n + h * sum); 
+
     % 3. Zdefiniowanie funkcji numerycznej
     f_calls = arrayfun(@(idx) f(n-idx), 0:k-1); % [f(n), f(n-1), ..., f(n-k+1)]
     f_names = sym('f', [1 k]); % [f1, ..., f_k]

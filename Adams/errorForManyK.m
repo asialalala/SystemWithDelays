@@ -1,6 +1,6 @@
-for k = 12:12
+for k = 10:19
     % 1. Definicja parametrów modelu
-    h = 0.001;
+    h = 0.01;
     tk = 5;
     
     % 2. Definicja pd
@@ -33,7 +33,7 @@ for k = 12:12
     
     % --- ZAPIS DO PLIKU CSV ---
     % Nagłówki: Rząd, Max_Error, RMSE
-    csv_filename = 'Results/bledy.csv';
+    csv_filename = 'Results2/bledy.csv';
     data_row = [k, max_err, rmse];
     
     % Jeśli plik nie istnieje, zapisujemy z nagłówkami (opcjonalnie)
@@ -65,9 +65,9 @@ for k = 12:12
     xlabel('t'); ylabel('|x_{adams} - x_{dde}|');
     
     % Zapis wykresu do pliku PNG
-    img_name = sprintf('Results/wykres_k%d.png', k);
+    img_name = sprintf('Results2/wykres_k%d.png', k);
     saveas(fig, img_name);
     
     % Zamknięcie figury, aby nie zaśmiecać pamięci przy wielu iteracjach
-    % close(fig);
+    close(fig);
 end
