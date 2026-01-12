@@ -33,14 +33,14 @@ function [time, solution] = expliciteAdamsSolver(k, h, tk, f_ode, tau, phi)
 
         if k_eff < k 
             % ROZRUCH Metoda eulera (k = 1)
-            fn = f_ode(t(n), x(n), x(n - Ntau));
+            fn = f_ode(n, x(1:n));
             x(n+1) = x(n) + h * fn;
         else
             % Przygotowanie wektora wartosci pochodnych: [f(n), f(n-1), ..., f(n-k+1)]
             f_vals = zeros(1, k); % Dla k-tego rzedu zawsze k pochodnych
             for i = 0:k-1
                 idx = n - i;
-                f_vals(i+1) = f_ode(t(idx), x(idx), x(idx - Ntau));
+                f_vals(i+1) = f_ode(idx, x(1:idx));
             end
 
             % Wywo³anie: adamsFunc(h, y_n, f1, f2, ...)

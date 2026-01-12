@@ -1,28 +1,26 @@
-for k = 10:19
-    % 1. Definicja parametrów modelu
-    h = 0.01;
-    tk = 5;
-    
-    % 2. Definicja pd
-    % roblemu
-    tau = 1;
-    f_ode = @(t, x, xTau) xTau + x + 1; 
-    phi = @(teta) -exp(teta);
+clear all;
+close all;
+
+% 1. Definicja parametrów modelu
+h = 0.01;
+tk = 5;
+
+% 2. Definicja problemu
+A = 1;
+B = 2;
+C = 3;
+phi = exampleFunctions.get_phi1(C);
+f_ode = exampleFunctions.get_f_ode1(h, A, B, C);
+tau = B;
+
+for k = 15:18
     
     % 3. Rozwiazanie Metoda Explicite Adams
     [t_adams, x_adams] = expliciteAdamsSolver(k, h, tk, f_ode, tau, phi);
-    lags = [tau];
-    
-    % 4. Rozwizanie Solverem Matlaba
-    tspan = [0 tk];
-    ddefun = @(t, x, Z) Z(:,1) + x + 1;
-    sol_matlab = dde23(ddefun, lags, phi, tspan);
-    
-    % 5. Ewaluacja dde23 w punktach t_adams
-    x_matlab = deval(sol_matlab, t_adams);
+    x_exact = exampleFunctions.sol1(t_adams, A, B, C); % Dokładne rozwiązanie dla porównania
     
     % 7. Obliczenie błędu bezwzględnego
-    error_val = abs(x_adams - x_matlab);
+    error_val = abs(x_adams - x_exact);
     
     % 8. Statystyki błędu
     max_err = max(error_val);
@@ -33,7 +31,7 @@ for k = 10:19
     
     % --- ZAPIS DO PLIKU CSV ---
     % Nagłówki: Rząd, Max_Error, RMSE
-    csv_filename = 'Results2/bledy.csv';
+    csv_filename = 'Results/bledy.csv';
     data_row = [k, max_err, rmse];
     
     % Jeśli plik nie istnieje, zapisujemy z nagłówkami (opcjonalnie)
@@ -50,10 +48,10 @@ for k = 10:19
     
     % Wykres rozwiązań
     subplot(1, 2, 1);
-    plot(t_adams, x_matlab, 'k-', 'LineWidth', 2); hold on;
+    plot(t_adams, x_exact, 'b-', 'LineWidth', 2); hold on;
     plot(t_adams, x_adams, 'r--', 'LineWidth', 1.5);
     grid on;
-    legend('dde23 (Reference)', ['Adams k=', num2str(k)], 'Location', 'best');
+    legend('exact sol (Reference)', ['Adams k=', num2str(k)], 'Location', 'best');
     title(['Porównanie rozwiązań k=', num2str(k)]);
     xlabel('t'); ylabel('x(t)');
     
@@ -65,7 +63,7 @@ for k = 10:19
     xlabel('t'); ylabel('|x_{adams} - x_{dde}|');
     
     % Zapis wykresu do pliku PNG
-    img_name = sprintf('Results2/wykres_k%d.png', k);
+    img_name = sprintf('Results/wykres_k%d.png', k);
     saveas(fig, img_name);
     
     % Zamknięcie figury, aby nie zaśmiecać pamięci przy wielu iteracjach
