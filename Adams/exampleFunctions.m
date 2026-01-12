@@ -30,10 +30,14 @@ classdef exampleFunctions
                 sol(i) = current_sum*C;
             end
         end 
+
+        function handler = get_sol1(A, B, C)
+            handler = @(t) sol1(t, A, B, C);
+        end
         
         % Equation 2 
         function f_handle = get_f_ode2(h)
-            tau = pi/2;
+            tau = pi/2;    % !! remember to change the tau variable in apper layer
             Ntau = round(tau/h);
             f_handle = @(idxT, x) -x(idxT - Ntau);
         end
@@ -42,8 +46,8 @@ classdef exampleFunctions
             phi_handle = @(t) sin(t);
         end
 
-        function sol = sol2(t)
-            sol = sin(t);
+        function sol_handle = get_sol2()
+            sol_handle = @(t)sin(t);
         end 
      
         % TODO - implement more functions
