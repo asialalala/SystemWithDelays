@@ -32,7 +32,7 @@ classdef exampleFunctions
         end 
 
         function handler = get_sol1(A, B, C)
-            handler = @(t) sol1(t, A, B, C);
+            handler = @(t) exampleFunctions.sol1(t, A, B, C);
         end
         
         % Equation 2 

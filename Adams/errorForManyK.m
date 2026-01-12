@@ -6,13 +6,13 @@ h = 0.01;
 tk = 5;
 
 % 2. Definicja problemu
-% A = 1;
-% B = 2;
-% C = 3;
-phi = exampleFunctions.get_phi2();
-f_ode = exampleFunctions.get_f_ode2(h);
-f_sol = exampleFunctions.get_sol2();
-tau = pi/2;
+ A = 1;
+ B = 2;
+ C = 3;
+phi = exampleFunctions.get_phi1(C);
+f_ode = exampleFunctions.get_f_ode1(h, A, B, C);
+f_sol = exampleFunctions.get_sol1(A, B, C);
+tau = B;
 
 for k = 1:18
     
