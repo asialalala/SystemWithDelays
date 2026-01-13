@@ -1,9 +1,12 @@
 % Examples of functions from "A Set of Functional Differential Equation"
 % In numerical form
 
-classdef exampleFunctions
+classdef exampleRddeFunctions
     methods (Static)
-        % Equation 1
+        % Equation 1.1
+        % Model: $x'(t) = A \cdot x(t - \tau)$, where $\tau = B$
+        % Initial condition: $\phi(t) = C$
+        % Solution: $x(t) = C \cdot \sum_{n=0}^{\lfloor t/B \rfloor + 1} \frac{A^n (t - (n-1)B)^n}{n!}$
         function f_handle = get_f_ode1(h, A, B, C)
             Ntau = round(B/h);
             f_handle = @(idxT, x) A*x(idxT - Ntau);
@@ -32,10 +35,14 @@ classdef exampleFunctions
         end 
 
         function handler = get_sol1(A, B, C)
-            handler = @(t) exampleFunctions.sol1(t, A, B, C);
+            handler = @(t) exampleRddeFunctions.sol1(t, A, B, C);
         end
         
-        % Equation 2 
+        % Equation 1.2 
+        % Model: $x'(t) = -x(t - \frac{\pi}{2})$
+        % Initial condition: $\phi(t) = \sin(t)$
+        % Solution: $x(t) = \sin(t)$
+
         function f_handle = get_f_ode2(h)
             tau = pi/2;    % !! remember to change the tau variable in apper layer
             Ntau = round(tau/h);

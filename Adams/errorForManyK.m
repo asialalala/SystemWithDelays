@@ -9,9 +9,9 @@ tk = 5;
  A = 1;
  B = 2;
  C = 3;
-phi = exampleFunctions.get_phi1(C);
-f_ode = exampleFunctions.get_f_ode1(h, A, B, C);
-f_sol = exampleFunctions.get_sol1(A, B, C);
+phi = exampleRddeFunctions.get_phi1(C);
+f_ode = exampleRddeFunctions.get_f_ode1(h, A, B, C);
+f_sol = exampleRddeFunctions.get_sol1(A, B, C);
 tau = B;
 
 for k = 1:18
