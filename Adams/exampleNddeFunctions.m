@@ -2,7 +2,6 @@
 % In numerical form
 classdef exampleNddeFunctions
     methods (Static)
-        % Equation 1.1
         % Equation 1.1 (Neutral DDE)
         % Model: $x'(t) = x(t) + x(t - \tau) + c \cdot x'(t - \tau)$
         % Here $\tau = 1$, and $x'(t - \tau)$ is approximated by finite difference:
@@ -11,11 +10,12 @@ classdef exampleNddeFunctions
         % For $t \in [0, 1]: x(t) = -\frac{1}{4} + t + \frac{1}{4}e^t$
         % For $t \in (1, 2]: x(t) = \frac{1}{2} - t + \frac{1}{4}e^t + \frac{17}{16}e^{t-1} + \frac{3}{16}t e^{t-1}$
         
-        function f_handle = get_f_ode1(h, delta)
+        function f_handle = get_f_ode1(h)
             tau = 1;
             Ntau = round(tau/h);
-            Ndelta = round(delta/h);
-            f_handle = @(idxT, x) x(idxT) + x(idxT - Ntau) + 1/4 * (( x(idxT - Ntau) - x(idxT - Ntau - Ndelta) )/delta);
+            Ndelta = 1;
+            delta = Ndelta*h;
+            f_handle = @(idxT, x) x(idxT) + x(idxT - Ntau) - 1/4 * (( x(idxT - Ntau) - x(idxT - Ntau - Ndelta) )/delta);
         end
         
         function phi_handle = get_phi1()
