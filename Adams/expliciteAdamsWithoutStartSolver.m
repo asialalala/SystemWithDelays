@@ -1,4 +1,4 @@
-function [time, solution] = expliciteNddeAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi)
+function [time, solution] = expliciteAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi)
 % Solves the given differential equation using the Explicit Adams method.
 %   k     - Method order
 %   h     - Time step size

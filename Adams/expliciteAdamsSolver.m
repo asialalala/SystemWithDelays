@@ -21,7 +21,7 @@ function [time, solution] = expliciteNddeAdamsSolver(k, h, tk, f_ode, tau, phi)
 
     x = zeros(1, Nx);
     offset = tau + h;
-    t = (0:Nx-1)*h - offset; % time axis offset by tau
+    t = ((1:Nx) - (Nteta + 1)) * h; % time axis offset by tau
     
     % 3. Initail condition (history)
     tetaSpan = -offset: h : 0;
