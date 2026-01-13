@@ -1,4 +1,4 @@
-function [time, solution] = expliciteAdamsSolver(k, h, tk, f_ode, tau, phi)
+function [time, solution] = expliciteRddeAdamsSolver(k, h, tk, f_ode, tau, phi)
 % Rozwiazuje przekazane rownanie rozniczkowe metoda explicite adams
 %   k - rzad metody
 %   h - krok (jako czas), co jaki czas obliczany jest kolejny punkt
@@ -15,27 +15,20 @@ function [time, solution] = expliciteAdamsSolver(k, h, tk, f_ode, tau, phi)
     % 2. Inicjalizacja siatki i pamiêci
     Ntau = round(tau/h); % Liczba próbek z opó¼nienia
     N = round(tk/h);     % Docelowa liczba próbek rozwiazania   
-    Nx = N + Ntau + 1;   % Liczba wszystkich próbek (rozwi±zanie od 0 + próbki opó¼nione + 0)
-
+    Nteta = Ntau + (k-1);
+    Nx = N + Nteta + 1;   % Liczba wszystkich próbek (rozwi±zanie od 0 + próbki opó¼nione + 0)
+    
     x = zeros(1, Nx);
-    t = (0:Nx-1)*h - tau; % Os czasu przesuniêta o tau
+    offset = tau + (k-1)*h;
+    t = (0:Nx-1)*h - offset; % Os czasu przesuniêta o tau
     
     % 3. Warunek poczatkowy (historia)
-    tetaSpan = -tau : h : 0;
-    x(1:Ntau+1) = phi(tetaSpan);
+    tetaSpan = -offset : h : 0;
+    x(1:Nteta+1) = phi(tetaSpan);
 
     % 4. G£ÓWNA PÊTLA OBLICZENIOWA
-    for n = Ntau+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla probki n+1 probki
+    for n = Nteta+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla probki n+1 probki
 
-        % Sprawdzamy, czy mamy wystarczajaco du¿o probek wstecz dla rzêdu k
-        % Jesli nie (rozruch), u¿yj ni¿szego rzêdu  (Euler)
-        k_eff = min(k, n - Ntau); 
-
-        if k_eff < k 
-            % ROZRUCH Metoda eulera (k = 1)
-            fn = f_ode(n, x(1:n));
-            x(n+1) = x(n) + h * fn;
-        else
             % Przygotowanie wektora wartosci pochodnych: [f(n), f(n-1), ..., f(n-k+1)]
             f_vals = zeros(1, k); % Dla k-tego rzedu zawsze k pochodnych
             for i = 0:k-1
@@ -46,9 +39,8 @@ function [time, solution] = expliciteAdamsSolver(k, h, tk, f_ode, tau, phi)
             % Wywo³anie: adamsFunc(h, y_n, f1, f2, ...)
             args = num2cell([h, x(n), f_vals]);
             x(n+1) = adamsFunc(args{:});
-        end
     end
     % Zwróæ solution od 0 do tk
-    solution = x(Ntau+1:end);
-    time = t(Ntau+1:end);
+    solution = x(Nteta+1:end);
+    time = t(Nteta+1:end);
 end

@@ -5,16 +5,20 @@ close all;
 h = 0.01;
 tk = 2;
 
+A = 1;
+B = 2;
+C = 3;
+
 % 2. Problem definition
-phi = exampleNddeFunctions.get_phi1();
-f_ode = exampleNddeFunctions.get_f_ode1(h);
-f_sol = exampleNddeFunctions.get_sol1();
-tau = 1;
+phi = exampleRddeFunctions.get_phi1(C);
+f_ode = exampleRddeFunctions.get_f_ode1(h, A, B, C);
+f_sol = exampleRddeFunctions.get_sol1(A, B, C);
+tau = B;
 
 for k = 1:18
     
     % 3. solution with Explicite Adams Method
-    [t_adams, x_adams] = expliciteAdamsNddeSolver(k, h, tk, f_ode, tau, phi);
+    [t_adams, x_adams] = expliciteNddeAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi);
     x_exact = f_sol(t_adams); % Dokładne rozwiązanie dla porównania
     
     % 7. Obliczenie błędu bezwzględnego

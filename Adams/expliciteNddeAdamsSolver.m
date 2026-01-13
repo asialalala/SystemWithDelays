@@ -16,17 +16,19 @@ function [time, solution] = expliciteNddeAdamsSolver(k, h, tk, f_ode, tau, phi)
     Ntau = round(tau/h); % Sample offset fot tau (delay)
     N = round(tk/h);     % Solution number of samples  
     Ndelta = 1; % The smalest posiible sample offset for derivative
-    Nx = N + Ntau + Ndelta + 1;   % Number of all samples
+    Nteta = Ntau + Ndelta;
+    Nx = N + Nteta + 1;   % Number of all samples
 
     x = zeros(1, Nx);
-    t = (0:Nx-1)*h - tau; % time axis offset by tau
+    offset = tau + h;
+    t = (0:Nx-1)*h - offset; % time axis offset by tau
     
     % 3. Initail condition (history)
-    tetaSpan = -tau - h: h : 0;
-    x(1:Ntau+Ndelta+1) = phi(tetaSpan);
+    tetaSpan = -offset: h : 0;
+    x(1:Nteta+1) = phi(tetaSpan);
 
     % 4. MAIN COMPUTATIONAL LOOP
-    for n = Ntau+Ndelta+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla probki n+1 probki
+    for n = Nteta+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla probki n+1 probki
 
         % Check if enough history exists for order k; if not fallback to lower order (Euler), accounting for delta lag. Consider the
         % Ndelta for derivative
@@ -50,6 +52,6 @@ function [time, solution] = expliciteNddeAdamsSolver(k, h, tk, f_ode, tau, phi)
         end
     end
     % Return solution from 0 to tk
-    solution = x(Ntau + Ndelta + 1:end);
-    time = t(Ntau+Ndelta+1:end);
+    solution = x(Nteta+ 1:end);
+    time = t(Nteta+1:end);
 end
