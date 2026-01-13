@@ -15,10 +15,10 @@ f_ode = exampleRddeFunctions.get_f_ode1(h, A, B, C);
 f_sol = exampleRddeFunctions.get_sol1(A, B, C);
 tau = B;
 
-for k = 1:18
+for k = 2:2
     
     % 3. solution with Explicite Adams Method
-    [t_adams, x_adams] = expliciteNddeAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi);
+    [t_adams, x_adams] = expliciteRddeAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi);
     x_exact = f_sol(t_adams); % Dokładne rozwiązanie dla porównania
     
     % 7. Obliczenie błędu bezwzględnego

@@ -21,7 +21,7 @@ Nx = N + 1 + Nteta;   % Number of all samples
 
 x = zeros(1, Nx);
 offset = tau + h + (k-1)*h;
-t = (0:Nx-1)*h - offset; % time axis offset 
+t = ((1:Nx) - (Nteta + 1)) * h; % time axis offset 
 
 
 % 3. Initail condition (history)
@@ -30,7 +30,7 @@ x(1:Nteta+1) = phi(tetaSpan);
 
 % 4. MAIN COMPUTATIONAL LOOP
 for n = Nteta+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla probki n+1 probki
-
+    
     % Check if enough history exists for order k; if not fallback to lower order (Euler), accounting for delta lag. Consider the
     % Ndelta for derivative
 

@@ -20,7 +20,7 @@ function [time, solution] = expliciteRddeAdamsSolver(k, h, tk, f_ode, tau, phi)
     
     x = zeros(1, Nx);
     offset = tau + (k-1)*h;
-    t = (0:Nx-1)*h - offset; % Os czasu przesuniêta o tau
+    t = ((1:Nx) - (Nteta + 1)) * h; % Os czasu przesuniêta o tau
     
     % 3. Warunek poczatkowy (historia)
     tetaSpan = -offset : h : 0;
@@ -28,7 +28,6 @@ function [time, solution] = expliciteRddeAdamsSolver(k, h, tk, f_ode, tau, phi)
 
     % 4. G£ÓWNA PÊTLA OBLICZENIOWA
     for n = Nteta+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla probki n+1 probki
-
             % Przygotowanie wektora wartosci pochodnych: [f(n), f(n-1), ..., f(n-k+1)]
             f_vals = zeros(1, k); % Dla k-tego rzedu zawsze k pochodnych
             for i = 0:k-1
