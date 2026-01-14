@@ -18,7 +18,7 @@ tau = B;
 for k = 1:5
     
     % 3. solution with Explicite Adams Method
-    [t_adams, x_adams] = expliciteAdamsSolver(k, h, tk, f_ode, tau, phi);
+    [t_adams, x_adams] = expliciteAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi);
     x_exact = f_sol(t_adams); % Dokładne rozwiązanie dla porównania
     
     % 7. Obliczenie błędu bezwzględnego

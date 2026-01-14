@@ -4,7 +4,7 @@ function [time, solution] = expliciteNddeAdamsSolver(k, h, tk, f_ode, tau, phi)
 %   h     - Time step size
 %   tk    - Final simulation time
 %   f_ode - Function handle defining the ODE
-%   lags  - Vector of time delays (e.g., [tau, delta])
+%   tau   - Delay from the equation
 %   phi   - Initial condition function defined on the interval [-max(lags), 0]
 %
 %   Returns solution - solution from 0 to tk

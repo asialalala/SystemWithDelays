@@ -1,4 +1,4 @@
-function [time, solution] = expliciteAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi)
+function [time, solution] = expliciteAdamsWithoutStartSolverNewApproach(k, h, tk, f_ode, tau, phi)
 % Solves the given differential equation using the Explicit Adams method.
 %   k     - Method order
 %   h     - Time step size
@@ -10,13 +10,13 @@ function [time, solution] = expliciteAdamsWithoutStartSolver(k, h, tk, f_ode, ta
 %   Returns solution - solution from 0 to tk
 
 % 1. Adaams method formula with order k
-[adamsFunc, formulaSym] = getFormula(k);
+[adamsFunc, formulaSym] = getFormulaNewApproach(k);
 
 % 2. Memory grid initailization
 Ntau = round(tau/h); % Sample offset for tau (delay)
 N = round(tk/h);     % Solution number of samples
 Ndelta = 1; % The smalest posiible sample offset for derivative
-Nteta = Ntau + Ndelta + (k-1);
+Nteta = 2*Ntau + Ndelta + (k-1); % multiply by 2!
 Nx = N + 1 + Nteta;   % Number of all samples
 
 x = zeros(1, Nx);
@@ -41,8 +41,15 @@ for n = Nteta+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla pro
         f_vals(i+1) = f_ode(idx, x(1:idx));
     end
 
+    % Prepare derivative vector in tau
+    f_tau_vals = zeros(1, k);
+    for i = 0:k-1
+        idx = n - i - Ntau;
+        f_vals(i+1) = f_ode(idx, x(1:idx));
+    end
+
     % Run: adamsFunc(h, y_n, f1, f2, ...)
-    args = num2cell([h, x(n), f_vals]);
+    args = num2cell([h, x(n), f_vals, f_tau_vals]);
     x(n+1) = adamsFunc(args{:});
 end
 % Return solution from 0 to tk
