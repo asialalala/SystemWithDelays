@@ -20,7 +20,7 @@ Nteta = 2*Ntau + Ndelta + (k-1); % multiply by 2!
 Nx = N + 1 + Nteta;   % Number of all samples
 
 x = zeros(1, Nx);
-offset = tau + h + (k-1)*h;
+offset = 2*tau + h + (k-1)*h; % multiply by 2!
 t = ((1:Nx) - (Nteta + 1)) * h; % time axis offset 
 
 

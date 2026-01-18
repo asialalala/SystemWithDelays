@@ -2,72 +2,108 @@ clear all;
 close all;
 
 % 1. Model parameters definition
-h = 0.01;
+h = 0.0001;
 tk = 2;
 
-A = 1;
-B = 2;
-C = 3;
-
 % 2. Problem definition
-phi = exampleRddeFunctions.get_phi1(C);
-f_ode = exampleRddeFunctions.get_f_ode1(h, A, B, C);
-f_sol = exampleRddeFunctions.get_sol1(A, B, C);
-tau = B;
+phi = exampleNddeFunctions.get_phi1();
+f_ode = exampleNddeFunctions.get_f_ode1(h);
+f_sol = exampleNddeFunctions.get_sol1();
+tau = 1;
+t_span = 0:h:tk;
 
-for k = 1:5
+if ~exist('Results', 'dir'), mkdir('Results'); end
+
+% Plik zbiorczy na błędy (nadpisywany przy nowym uruchomieniu)
+summary_filename = 'Results/summary_errors.csv';
+header = {'k', 'Method', 'Max_Error', 'RMSE'};
+writecell(header, summary_filename);
+
+for k = 17:17
+
+    % exact solution
+    x_exact = f_sol(t_span); % as a reference
+
+    % 3. solution with Explicite Adams Method and Start
+    [t_adamsS, x_adamsS] = expliciteAdamsSolver(k, h, tk, f_ode, tau, phi);
+    error_valS = abs(x_adamsS - x_exact);
+
+    % % 4. solution with Explicite Adams Method without Start
+    % [t_adamsWS, x_adamsWS] = expliciteAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi);
+    % error_valWS = abs(x_adamsWS - x_exact);
+    % 
+    % % 4. solution with Explicite Adams Method New Approach
+    % [t_adamsWSNA, x_adamsWSNA] = expliciteAdamsWithoutStartSolverNewApproach(k, h, tk, f_ode, tau, phi);
+    % error_valWSNA = abs(x_adamsWSNA - x_exact);
+
+    % 6. ddends (Matlab) solution
+    sol_matlab = ddensd(@ddefun,@dely,@delyp,@history,[0,tk]);
+    t_matlab = t_span;
+    x_matlab = deval(sol_matlab,t_matlab);
+    error_valM = abs(x_matlab - x_exact);
+
+
+   % --- ZAPIS SZCZEGÓŁOWY DLA DANEGO K ---
+    csv_filename = sprintf('Results/wynik_k%d.csv', k);
+    T = table(t_span(:), x_exact(:), x_adamsS(:), x_matlab(:), error_valS(:), error_valM(:), ...
+        'VariableNames', {'Time', 'Exact', 'Adams_S', 'ddends', ...
+                          'Err_S', 'Err_ddends'});
+    writetable(T, csv_filename);
+
+    fprintf('Wyniki zostały zapisane do pliku: %s\n', csv_filename);
+
+    % --- ZAPIS ZBIORCZY BŁĘDÓW ---
+    methods = {'Adams_Start', 'ddends'};
+    errors = {error_valS, error_valM};
     
-    % 3. solution with Explicite Adams Method
-    [t_adams, x_adams] = expliciteAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi);
-    x_exact = f_sol(t_adams); % Dokładne rozwiązanie dla porównania
-    
-    % 7. Obliczenie błędu bezwzględnego
-    error_val = abs(x_adams - x_exact);
-    
-    % 8. Statystyki błędu
-    max_err = max(error_val);
-    rmse = sqrt(mean(error_val.^2));
-    
-    fprintf('Maksymalny błąd bezwzględny dla k=%d: %e\n', k, max_err);
-    fprintf('Błąd RMSE dla k=%d: %e\n', k, rmse);
-    
-    % --- ZAPIS DO PLIKU CSV ---
-    % Nagłówki: Rząd, Max_Error, RMSE
-    csv_filename = 'Results/bledy.csv';
-    data_row = [k, max_err, rmse];
-    
-    % Jeśli plik nie istnieje, zapisujemy z nagłówkami (opcjonalnie)
-    if ~exist(csv_filename, 'file')
-        header = {'Rzad_k', 'Max_Error', 'RMSE'};
-        writecell(header, csv_filename);
+    for m = 1:2
+        m_err = max(errors{m});
+        m_rmse = sqrt(mean(errors{m}.^2));
+        row = {k, methods{m}, m_err, m_rmse};
+        writecell(row, summary_filename, 'WriteMode', 'append');
     end
-    
-    % Dopisywanie danych do pliku CSV
-    writematrix(data_row, csv_filename, 'WriteMode', 'append');
-    
+
+
     % --- WIZUALIZACJA I ZAPIS DO PNG ---
-    fig = figure('Position', [100, 100, 1000, 400], 'Visible', 'on'); % 'Visible', 'off' jeśli nie chcesz wyświetlać okien
-    
-    % Wykres rozwiązań
-    subplot(1, 2, 1);
-    plot(t_adams, x_exact, 'b-', 'LineWidth', 2); hold on;
-    plot(t_adams, x_adams, 'r--', 'LineWidth', 1.5);
+    fig = figure('Position', [100, 100, 1000, 400], 'Visible', 'off'); % 'Visible', 'off' jeśli nie chcesz wyświetlać okien
+    set(fig, 'Color', 'w');
+
+    % Subplot 1: Porównanie rozwiązań
+    mSize = 6;
+    ax1 = subplot(1, 2, 1);
+    plot(t_span, x_exact, 'k-', 'LineWidth', 1.5); hold on;
+    plot(t_span, x_adamsS, 'r-o', 'MarkerSize', mSize, 'LineWidth', 0.8);
+    % plot(t_span, x_adamsWS, 'g-s', 'MarkerSize', mSize, 'LineWidth', 0.8);
+    % plot(t_span, x_adamsWSNA, 'b-d', 'MarkerSize', mSize, 'LineWidth', 0.8);
+    plot(t_span, x_matlab, 'm-x', 'MarkerSize', mSize, 'LineWidth', 0.8);
+
     grid on;
-    legend('exact sol (Reference)', ['Adams k=', num2str(k)], 'Location', 'best');
-    title(['Porównanie rozwiązań k=', num2str(k)]);
-    xlabel('t'); ylabel('x(t)');
-    
-    % Wykres błędu
-    subplot(1, 2, 2);
-    semilogy(t_adams, error_val + eps, 'b', 'LineWidth', 1.5);
+    set(ax1, 'XColor', 'k', 'YColor', 'k', 'Color', 'w'); 
+    legend('Exact', 'Adams Start', 'ddends', ...
+           'Location', 'best', 'TextColor', 'k', 'Color', 'w', 'EdgeColor', 'k');
+    title(['Comparison of Methods (k=', num2str(k), ')'], 'Color', 'k');
+    xlabel('t', 'Color', 'k'); ylabel('x(t)', 'Color', 'k');
+
+    ax2 = subplot(1, 2, 2); 
+    semilogy(t_span, error_valS, 'r-o', 'MarkerSize', mSize); hold on;
+    % semilogy(t_span, error_valWS, 'g-s', 'MarkerSize', mSize);
+    % semilogy(t_span, error_valWSNA, 'b-d', 'MarkerSize', mSize);
+    semilogy(t_span, error_valM, 'm-x', 'MarkerSize', mSize);
+
     grid on;
-    title('Błąd bezwzględny (log)');
-    xlabel('t'); ylabel('|x_{adams} - x_{dde}|');
-    
+    set(ax2, 'XColor', 'k', 'YColor', 'k', 'Color', 'w'); 
+    legend('Err Start','Err ddends', ...
+           'Location', 'best', 'TextColor', 'k', 'Color', 'w', 'EdgeColor', 'k');
+    title('Absolute Error (log scale)', 'Color', 'k');
+    xlabel('t', 'Color', 'k'); ylabel('Error', 'Color', 'k');
+
+    % Dodatkowe upewnienie się, że napisy na osiach (tyknięcia) są czarne
+    set([ax1, ax2], 'GridColor', [0.8 0.8 0.8], 'MinorGridColor', [0.9 0.9 0.9]);
+
     % Zapis wykresu do pliku PNG
     img_name = sprintf('Results/wykres_k%d.png', k);
     saveas(fig, img_name);
-    
+
     % Zamknięcie figury, aby nie zaśmiecać pamięci przy wielu iteracjach
     close(fig);
 end
