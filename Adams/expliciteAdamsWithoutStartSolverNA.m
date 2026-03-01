@@ -1,4 +1,4 @@
-function [time, solution] = expliciteAdamsWithoutStartSolverNewApproach(k, h, tk, f_ode, tau, phi)
+function [time, solution] = expliciteAdamsWithoutStartSolverNA(k, h, tk, f_ode, tau, phi)
 % Solves the given differential equation using the Explicit Adams method.
 %   k     - Method order
 %   h     - Time step size
@@ -10,7 +10,7 @@ function [time, solution] = expliciteAdamsWithoutStartSolverNewApproach(k, h, tk
 %   Returns solution - solution from 0 to tk
 
 % 1. Adaams method formula with order k
-[adamsFunc, formulaSym] = getFormulaNewApproach(k);
+[adamsFunc, formulaSym] = getFormulaNA(k,h, tau);
 
 % 2. Memory grid initailization
 Ntau = round(tau/h); % Sample offset for tau (delay)
@@ -34,22 +34,24 @@ for n = Nteta+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla pro
     % Check if enough history exists for order k; if not fallback to lower order (Euler), accounting for delta lag. Consider the
     % Ndelta for derivative
 
-    % Prepare derivative vector: [f(n), f(n-1), ..., f(n-k+1)]
-    f_vals = zeros(1, k); % k order -> k derivatives
-    for i = 0:k-1
+    % Prepare derivative vector: [f(n), f(n-1), ..., f(n-k/2+1)]
+    f_vals_1 = zeros(1, ceil(k/2)); % k order -> k derivatives
+    for i = 0:(round(k/2)-1)
         idx = n - i;
-        f_vals(i+1) = f_ode(idx, x(1:idx));
+        f_vals_1(i+1) = f_ode(idx, x(1:idx));
     end
 
     % Prepare derivative vector in tau
-    f_tau_vals = zeros(1, k);
-    for i = 0:k-1
+    f_tau_vals_2 = zeros(1, floor(k/2));
+    for i = 0:(floor(k/2)-1)
         idx = n - i - Ntau;
-        f_vals(i+1) = f_ode(idx, x(1:idx));
+        f_tau_vals_2(i+1) = f_ode(idx, x(1:idx));
     end
+    
+    f_vals = [f_vals_1, f_tau_vals_2];
 
     % Run: adamsFunc(h, y_n, f1, f2, ...)
-    args = num2cell([h, x(n), f_vals, f_tau_vals]);
+    args = num2cell([x(n), f_vals]);
     x(n+1) = adamsFunc(args{:});
 end
 % Return solution from 0 to tk

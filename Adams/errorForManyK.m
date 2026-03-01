@@ -2,14 +2,17 @@ clear all;
 close all;
 
 % 1. Model parameters definition
-h = 0.0001;
-tk = 2;
+h = 0.01;
+tk = 6;
 
+A = 3;
+B = 2;
+C = 1;
 % 2. Problem definition
-phi = exampleNddeFunctions.get_phi1();
-f_ode = exampleNddeFunctions.get_f_ode1(h);
-f_sol = exampleNddeFunctions.get_sol1();
-tau = 1;
+phi = exampleRddeFunctions.get_phi1(C);
+f_ode = exampleRddeFunctions.get_f_ode1(h, A, B, C);
+f_sol = exampleRddeFunctions.get_sol1(A, B, C);
+tau = B;
 t_span = 0:h:tk;
 
 if ~exist('Results', 'dir'), mkdir('Results'); end
@@ -19,7 +22,7 @@ summary_filename = 'Results/summary_errors.csv';
 header = {'k', 'Method', 'Max_Error', 'RMSE'};
 writecell(header, summary_filename);
 
-for k = 5:5
+for k = 2:6
 
     % exact solution
     x_exact = f_sol(t_span); % Reference
@@ -32,8 +35,15 @@ for k = 5:5
     [t_adamsWS, x_adamsWS] = expliciteAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi);
     error_valWS = abs(x_adamsWS - x_exact);
 
+    
+    % 4. solution with Explicite Adams Method New Approachwithout Start
+    [t_adamsWSNA, x_adamsWSNA] = expliciteAdamsWithoutStartSolverNA(k, h, tk, f_ode, tau, phi);
+    error_valWSNA = abs(x_adamsWSNA - x_exact);
+
     % 6. ddends (Matlab) solution
-    sol_matlab = ddensd(@ddefun,@dely,@delyp,@history,[0,tk]);
+    % sol_matlab = ddensd(@ddefun,@dely,@delyp,@history,[0,tk]);
+    ddefun = @(t, y, lags) A * lags;
+    sol_matlab = dde23(ddefun, [B], C, t_span);
     t_matlab = t_span;
     x_matlab = deval(sol_matlab,t_matlab);
     error_valM = abs(x_matlab - x_exact);
@@ -41,10 +51,10 @@ for k = 5:5
 
    % --- ZAPIS SZCZEGÓŁOWY DLA DANEGO K ---
     csv_filename = sprintf('Results/wynik_k%d.csv', k);
-    T = table(t_span(:), x_exact(:), x_adamsS(:), x_adamsWS(:), x_matlab(:), ...
-        error_valS(:), error_valWS(:), error_valM(:), ...
-        'VariableNames', {'Time', 'Exact', 'Adams_S', 'Adams_WS', 'ddends', ...
-                          'Err_S', 'Err_WS', 'Err_ddends'});
+    T = table(t_span(:), x_exact(:), x_adamsS(:), x_adamsWS(:), x_adamsWSNA(:), x_matlab(:), ...
+        error_valS(:), error_valWS(:), error_valWSNA(:), error_valM(:), ...
+        'VariableNames', {'Time', 'Exact', 'Adams_S', 'Adams_WS', 'Adams_WSNA', 'ddends', ...
+                          'Err_S', 'Err_WS', 'Err_WSNA', 'Err_ddends'});
     writetable(T, csv_filename);
 
     fprintf('Wyniki zostały zapisane do pliku: %s\n', csv_filename);
@@ -72,24 +82,26 @@ for k = 5:5
     plot(t_span, x_exact, 'k-', 'LineWidth', 1.5); hold on;
     plot(t_span, x_adamsS, 'r-o', 'MarkerSize', mSize, 'LineWidth', 0.8);
     plot(t_span, x_adamsWS, 'g-s', 'MarkerSize', mSize, 'LineWidth', 0.8);
+    plot(t_span, x_adamsWSNA, 'b-d', 'MarkerSize', mSize, 'LineWidth', 0.8);
     plot(t_span, x_matlab, 'm-x', 'MarkerSize', mSize, 'LineWidth', 0.8);
 
     grid on;
     set(ax1, 'XColor', 'k', 'YColor', 'k', 'Color', 'w'); 
-    legend('Exact', 'Adams Start', 'Adams Without Start', 'ddends', ...
-        'Location', 'best', 'TextColor', 'k', 'Color', 'w', 'EdgeColor', 'k');
+    legend('Exact', 'Adams Start', 'Adams Without Start', 'Adams WSNA', ...
+        'ddends', 'Location', 'best', 'TextColor', 'k', 'Color', 'w', 'EdgeColor', 'k');
     title(['Comparison of Methods (k=', num2str(k), ')'], 'Color', 'k');
     xlabel('t', 'Color', 'k'); ylabel('x(t)', 'Color', 'k');
 
     ax2 = subplot(1, 2, 2); 
     semilogy(t_span, error_valS, 'r-o', 'MarkerSize', mSize); hold on;
     semilogy(t_span, error_valWS, 'g-s', 'MarkerSize', mSize);
+    semilogy(t_span, error_valWSNA, 'b-d', 'MarkerSize', mSize);
     semilogy(t_span, error_valM, 'm-x', 'MarkerSize', mSize);
 
     grid on;
     set(ax2, 'XColor', 'k', 'YColor', 'k', 'Color', 'w'); 
-    legend('Err Adams S', 'Err Adams WS', 'Err ddends', 'Location', ...
-        'best', 'TextColor', 'k', 'Color', 'w', 'EdgeColor', 'k');
+    legend('Err Adams S', 'Err Adams WS', 'Err Adams WSNA', ... 
+        'Err ddends', 'Location', 'best', 'TextColor', 'k', 'Color', 'w', 'EdgeColor', 'k');
     title('Absolute Error (log scale)', 'Color', 'k');
     xlabel('t', 'Color', 'k'); ylabel('Error', 'Color', 'k');
 

@@ -6,14 +6,12 @@
 % end
 
 %  FIRST NDDE
-function yp = ddefun(t,y,ydel,ypdel) 
-    yp = y + ydel - 1/4*ypdel;
-end
-
-
 % function yp = ddefun(t,y,ydel,ypdel) 
-% A = 1
-% B = 2;
-% C = 3;
 %     yp = y + ydel - 1/4*ypdel;
 % end
+
+
+function yp = ddefun(t,y,ydel) 
+    A = 1;
+    yp = A*ydel;
+end
