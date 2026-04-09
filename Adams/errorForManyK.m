@@ -22,7 +22,7 @@ summary_filename = 'Results/summary_errors.csv';
 header = {'k', 'Method', 'Max_Error', 'RMSE'};
 writecell(header, summary_filename);
 
-for k = 2:6
+for k = 2:3
 
     % exact solution
     x_exact = f_sol(t_span); % Reference
