@@ -7,9 +7,8 @@ classdef exampleRddeFunctions
         % Model: $x'(t) = A \cdot x(t - \tau)$, where $\tau = B$
         % Initial condition: $\phi(t) = C$
         % Solution: $x(t) = C \cdot \sum_{n=0}^{\lfloor t/B \rfloor + 1} \frac{A^n (t - (n-1)B)^n}{n!}$
-        function f_handle = get_f_ode1(h, A, B, C)
-            Ntau = round(B/h);
-            f_handle = @(idxT, x) A*x(idxT - Ntau);
+        function f_handle = get_f_ode1(A, B, C)
+            f_handle = @(t, x_curr, x_del) A*x_del;
         end
         
         function phi_handle = get_phi1(C)

@@ -2,19 +2,19 @@ clear all;
 close all;
 
 % 1. Model parameters definition
-h = 0.01;
-tk = 6;
+h = 0.1;
+tk = 10;
 
 A = 3;
 B = 2;
 C = 1;
-tau = 0;
+tau = B;
 k = 2;
 
 % 2. Problem definition
-phi = exampleFunction.get_phi1();
-f_ode = exampleFunction.get_f_ode1();
-f_sol = exampleFunction.get_sol1();
+phi = exampleRddeFunctions.get_phi1(C);
+f_ode = exampleRddeFunctions.get_f_ode1(A,B,C);
+f_sol = exampleRddeFunctions.get_sol1(A, B, C);
 t_span = 0:h:tk;
 
 x_exact = f_sol(t_span); % Reference
