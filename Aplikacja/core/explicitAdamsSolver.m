@@ -1,4 +1,4 @@
-function [time, solution] = explicitNddeAdamsSolver(k, h, tk, f_ode, tau, phi)
+function [time, solution] = explicitNddeAdamsSolver(k, h, tk, f_ode, Xtau, dXtau, phi)
 % Solves the given differential equation using the Explicit Adams method.
 %   k     - Method order
 %   h     - Time step size
@@ -13,37 +13,43 @@ function [time, solution] = explicitNddeAdamsSolver(k, h, tk, f_ode, tau, phi)
     [adamsFunc, formulaSym] = getExplicitAdamsFormula(k);
 
     % 2. Memory grid initailization
-    Ntau = round(tau/h); % Sample offset fot tau (delay)
+    % Sample offset fot tau (delay)
+    NXtau  = round(Xtau/h);
+    NdXtau = round(dXtau/h);
+    Ntau   = max(NXtau, NdXtau); 
     N = round(tk/h);     % Solution number of samples  
-    Ndelta = 1; % The smalest posiible sample offset for derivative
-    Nteta = Ntau + Ndelta;
-    Nx = N + Nteta + 1;   % Number of all samples
+
+    Nteta = Ntau + 1;    % The smallest possible sample offset for derivative
+    Nx = N + Nteta;  % Number of all samples
 
     x = zeros(1, Nx);
-    offset = tau + h;
-    t = ((1:Nx) - (Nteta + 1)) * h; % time axis offset by tau
+    t = ((1:Nx) - Nteta) * h; % time axis offset by tau
     
-    % 3. Initail condition (history)
-    tetaSpan = -offset: h : 0;
-    x(1:Nteta+1) = phi(tetaSpan);
+    % 3. Initial condition (history)
+    x(1:Nteta) = phi(t(1:Nteta));
 
     % 4. MAIN COMPUTATIONAL LOOP
-    for n = Nteta+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla probki n+1 probki
+    for n = Nteta : Nx-1 % Start from t=0 (Ntau)
+        
+        % Approx derivative
+        dx = approxDx(n, NdXtau, x, dXtau, h);
 
         % Check if enough history exists for order k; if not fallback to lower order (Euler), accounting for delta lag. Consider the
         % Ndelta for derivative
-        k_eff = min(k, n - Ntau - Ndelta); 
+        k_eff = min(k, n - Ntau - 1); 
 
         if k_eff < k 
-            % STARTING  Eulera method(k = 1)
-            fn = f_ode(n, x(1:n));
+            % STARTING  Euler method(k = 1)
+            fn = f_ode(t(n), x(n), x(n - NXtau), dx);
             x(n+1) = x(n) + h * fn;
         else
             % Prepare derivative vector: [f(n), f(n-1), ..., f(n-k+1)]
             f_vals = zeros(1, k); % k order -> k derivatives
             for i = 0:k-1
                 idx = n - i;
-                f_vals(i+1) = f_ode(idx, x(1:idx));
+                % Approx derivative
+                dx = approxDx(idx, NdXtau, x, dXtau, h);
+                f_vals(i+1) = f_ode(t(idx), x(idx), x(idx - NXtau), dx);
             end
 
             % Run: adamsFunc(h, y_n, f1, f2, ...)
@@ -52,6 +58,17 @@ function [time, solution] = explicitNddeAdamsSolver(k, h, tk, f_ode, tau, phi)
         end
     end
     % Return solution from 0 to tk
-    solution = x(Nteta+ 1:end);
-    time = t(Nteta+1:end);
+    solution = x(Nteta:end);
+    time = t(Nteta:end);
 end
+
+function dx = approxDx(n, NdXtau, x, dXtau, h)
+ % Approx derivative
+        if dXtau == 0
+            dx = 0;
+        elseif n - NdXtau > 1
+            dx = (x(n - NdXtau) - x(n - NdXtau - 1)) /h;
+        else 
+            dx = 0;
+        end
+end 

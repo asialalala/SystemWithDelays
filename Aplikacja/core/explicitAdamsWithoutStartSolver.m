@@ -1,4 +1,4 @@
-function [time, solution] = explicitAdamsWithoutStartSolver(k, h, tk, f_ode, tau, phi)
+function [time, solution] = explicitAdamsWithoutStartSolver(k, h, tk, f_ode, Xtau, dXtau, phi)
 % Solves the given differential equation using the Explicit Adams method.
 %   k     - Method order
 %   h     - Time step size
@@ -33,12 +33,19 @@ for n = Nteta+1 : Nx-1 % Start od t=0 (probki Ntau+1), obliczamy wartosc dla pro
     
     % Check if enough history exists for order k; if not fallback to lower order (Euler), accounting for delta lag. Consider the
     % Ndelta for derivative
+    
+    % Approx derrivative
+    if dXtau == 0
+        dx = 0;
+    else
+        dx = (x(idxT - dXtau) - x(idxT - Ntau - dXtau)) /h;
+    end
 
     % Prepare derivative vector: [f(n), f(n-1), ..., f(n-k+1)]
     f_vals = zeros(1, k); % k order -> k derivatives
     for i = 0:k-1
         idx = n - i;
-        f_vals(i+1) = f_ode(idx, x(1:idx));
+        f_vals(i+1) = f_ode(t(idx), x(idx), x(idx - Ntau), dx);
     end
 
     % Run: adamsFunc(h, y_n, f1, f2, ...)

@@ -10,12 +10,8 @@ classdef exampleNddeFunctions
         % For $t \in [0, 1]: x(t) = -\frac{1}{4} + t + \frac{1}{4}e^t$
         % For $t \in (1, 2]: x(t) = \frac{1}{2} - t + \frac{1}{4}e^t + \frac{17}{16}e^{t-1} + \frac{3}{16}t e^{t-1}$
         
-        function f_handle = get_f_ode1(h)
-            tau = 1;
-            Ntau = round(tau/h);
-            Ndelta = 1;
-            delta = Ndelta*h;
-            f_handle = @(idxT, x) x(idxT) + x(idxT - Ntau) - 1/4 * (( x(idxT - Ntau) - x(idxT - Ntau - Ndelta) )/delta);
+        function f_handle = get_f_ode1()
+            f_handle = @(t, x_curr, x_del, dx_del) x_curr + x_del - 1/4*dx_del; 
         end
         
         function phi_handle = get_phi1()
@@ -50,12 +46,8 @@ classdef exampleNddeFunctions
         % Solution (Only in range $t \in [0,2]$):
         % For $t \in [0, 1]: x(t) = -2 + t + 2 \cdot e^t$
         % For $t \in (1, 2]: x(t) = 4 - t + 2 \cdot e^t - 2(t + 1) \cdot e^{t-1}$
-        function f_handle = get_f_ode2(h)
-            tau = 1;
-            Ntau = round(tau/h);
-            Ndelta = 1;
-            delta = Ndelta*h;
-            f_handle = @(idxT, x) x(idxT) + x(idxT - Ntau) - 2 * (( x(idxT - Ntau) - x(idxT - Ntau - Ndelta) )/delta);
+        function f_handle = get_f_ode2()
+            f_handle = @(t, x_curr, x_del, dx_del) x_curr + x_del - 2 * dx_del;
         end
 
         function phi_handle = get_phi2()
